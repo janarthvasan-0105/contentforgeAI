@@ -1,6 +1,7 @@
 from langchain_groq import ChatGroq
 from langchain_core.messages import BaseMessage
 from app.config import get_settings
+import asyncio
 import time
 
 settings = get_settings()
@@ -79,3 +80,9 @@ def invoke_with_fallback(messages: list[BaseMessage], quality: bool = False) -> 
                     break  # Move to next model
 
     raise Exception(f"All Groq invocations failed: {last_error}")
+
+
+async def async_invoke_with_fallback(messages: list[BaseMessage], quality: bool = False) -> str:
+    """Async-safe wrapper for invoke_with_fallback — runs in thread pool to avoid blocking event loop."""
+    return await asyncio.to_thread(invoke_with_fallback, messages, quality)
+

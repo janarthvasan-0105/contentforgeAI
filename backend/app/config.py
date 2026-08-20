@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     supabase_url: str = ""
     supabase_key: str = ""
+    supabase_jwt_secret: str = ""  # From: Supabase Dashboard → Settings → API → JWT Secret
     
     app_base_url: str = "http://localhost:8000"
     jwt_secret_key: str

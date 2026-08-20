@@ -36,3 +36,12 @@ frontend/.next/
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Ignored sub-repos
+LTX-Video/
+
+# Temporary frame extractions and tests
+newframe1/
+newframe2/
+wan_test/
+screen.png

@@ -59,6 +59,13 @@ export async function publishContent(payload: FormData) {
   return res.data;
 }
 
+export async function uploadLogo(payload: FormData) {
+  const res = await API.post("/upload-logo", payload, {
+    headers: { "Content-Type": "multipart/form-data" }
+  });
+  return res.data;
+}
+
 export async function logout() {
   await supabase.auth.signOut();
   window.location.href = "/";
@@ -81,5 +88,19 @@ export async function disconnectTwitter(userId: string) {
 
 export async function liveCheckTwitter(userId: string) {
   const res = await API.post(`/twitter/live-check/${userId}`);
+  return res.data;
+}
+
+export async function getSpendAnalytics(userId: string, platform?: string) {
+  const params = new URLSearchParams({ user_id: userId });
+  if (platform && platform !== "all") {
+    params.append("platform", platform);
+  }
+  const res = await API.get(`/analytics/spend?${params.toString()}`);
+  return res.data;
+}
+
+export async function fetchSessionsFromApi() {
+  const res = await API.get("/sessions");
   return res.data;
 }

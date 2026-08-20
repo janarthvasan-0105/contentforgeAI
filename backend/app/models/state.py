@@ -12,6 +12,13 @@ class ContentForgeState(TypedDict):
     user_suggestion: Optional[str]          # custom user directives
     app_context: Optional[dict]             # extracted by scraper agent
     brand_identity: Optional[dict]          # extracted by scraper agent (logo, colors, fonts)
+    logo_url: Optional[str]                 # User's uploaded logo url for watermarking
+
+    # ── NEW: Compliance ─────────────────────────────────────
+    compliance_passed: Optional[bool]
+    compliance_reason: Optional[str]
+    compliance_retry_count: Optional[int]
+    needs_regeneration: Optional[bool]
 
     # ── NEW: Platform-specific video config ─────────────────
     video_config: Optional[dict]
@@ -94,6 +101,11 @@ class ContentForgeState(TypedDict):
     voiceover_path: Optional[str]
     voiceover_script: Optional[str]
     video_text_overlays: Optional[List[dict]]
+    
+    # ── NEW: Pipeline-specific video fields ─────────────────
+    video_scenes_schema: Optional[dict]
+    video_keyframes: Optional[List[str]]
+    interpolated_scenes: Optional[List[str]]
 
     # ── Pipeline control flags ──────────────────────────────
     image_generation_success: bool

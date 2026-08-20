@@ -3,6 +3,7 @@ import re
 from app.models.state import ContentForgeState
 from app.utils.llm import invoke_with_fallback
 from langchain_core.messages import HumanMessage
+from app.utils.suggestion_utils import build_suggestion_constraint
 
 
 def close_incomplete_json(json_str: str) -> str:
@@ -147,7 +148,7 @@ async def script_agent(state: ContentForgeState) -> ContentForgeState:
     app_context = state.get("app_context", {})
     purpose = state.get("purpose", "general")
     user_suggestion = state.get("user_suggestion", "") or ""
-    suggestion_str = f"\nUSER DIRECTIVES / CRITICAL STYLE SUGGESTIONS (Mandatory to implement):\n{user_suggestion}\n" if user_suggestion else ""
+    suggestion_str = build_suggestion_constraint(user_suggestion)
 
     # Build app context string
     app_context_str = ""

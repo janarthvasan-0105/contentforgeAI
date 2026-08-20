@@ -1,5 +1,6 @@
 from app.models.state import ContentState
 from app.utils.llm import invoke_with_fallback
+from app.utils.suggestion_utils import build_suggestion_constraint
 from langchain_core.messages import HumanMessage
 
 
@@ -28,7 +29,7 @@ async def image_prompt_agent(state: ContentState) -> ContentState:
     post_scripts = state.get("post_scripts", [])
     visual_concepts = state.get("visual_concepts", [])
     user_suggestion = state.get("user_suggestion", "") or ""
-    suggestion_str = f"\nUSER DIRECTIVES / CRITICAL STYLE SUGGESTIONS (Mandatory to implement):\n{user_suggestion}\n" if user_suggestion else ""
+    suggestion_str = build_suggestion_constraint(user_suggestion)
 
     # Pull post script content
     post_script = post_scripts[0] if post_scripts else {}

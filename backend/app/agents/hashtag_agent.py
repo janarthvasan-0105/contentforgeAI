@@ -1,6 +1,7 @@
 from app.models.state import ContentState
-from app.utils.llm import invoke_with_fallback
+from app.utils.llm import async_invoke_with_fallback
 from langchain_core.messages import HumanMessage, SystemMessage
+from app.utils.suggestion_utils import build_suggestion_constraint
 import json
 import re
 
@@ -24,6 +25,7 @@ async def hashtag_agent(state: ContentState) -> ContentState:
     Platform: {state['platform']}
     Audience: {state['audience']}
     Interests: {state.get('interests', [])}
+    {build_suggestion_constraint(state.get("user_suggestion"))}
 
     Generate a hashtag strategy. Return ONLY valid JSON:
     {{
@@ -60,7 +62,7 @@ async def hashtag_agent(state: ContentState) -> ContentState:
     - All hashtags must be relevant and spelled correctly
     """
 
-    result_text = invoke_with_fallback([
+    result_text = await async_invoke_with_fallback([
         SystemMessage(content="You are an SEO and hashtag expert. Return only valid JSON."),
         HumanMessage(content=prompt),
     ])

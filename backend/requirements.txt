@@ -25,3 +25,4 @@ aiofiles>=23.0.0
 pymongo
 sentence-transformers
 google-cloud-texttospeech>=2.16.0
+rife-ncnn-vulkan-python>=1.4.0

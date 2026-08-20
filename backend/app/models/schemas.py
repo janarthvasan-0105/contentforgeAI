@@ -24,6 +24,7 @@ class GenerateRequest(BaseModel):
     app_context_url: Optional[str] = None  # URL to scrape
     app_context_file_content: Optional[str] = None  # pasted/uploaded text
     user_suggestion: Optional[str] = None          # custom directives / suggestions
+    use_logo: bool = False                         # Opt-in for logo overlay
 
     # ── EXISTING fields (keep all) ──
     topic: str = Field(..., min_length=2, max_length=200)

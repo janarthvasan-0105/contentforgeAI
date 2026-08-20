@@ -1,5 +1,5 @@
 from app.models.state import ContentState
-from app.utils.llm import invoke_with_fallback
+from app.utils.llm import async_invoke_with_fallback
 from langchain_core.messages import HumanMessage, SystemMessage
 import json
 import re
@@ -48,7 +48,7 @@ async def audience_agent(state: ContentState) -> ContentState:
     }}
     """
 
-    result_text = invoke_with_fallback([
+    result_text = await async_invoke_with_fallback([
         SystemMessage(content="You are an audience research expert. Return only valid JSON."),
         HumanMessage(content=prompt),
     ])

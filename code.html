@@ -1,0 +1,520 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ContentForge Agents</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "inverse-on-surface": "#322f35",
+                            "surface-tint": "#cfbcff",
+                            "inverse-primary": "#6750a4",
+                            "tertiary-fixed": "#ffdf93",
+                            "tertiary-container": "#c9a74d",
+                            "on-error-container": "#ffdad6",
+                            "error": "#ffb4ab",
+                            "secondary-container": "#4d4465",
+                            "inverse-surface": "#e6e0e9",
+                            "on-tertiary-container": "#503d00",
+                            "on-primary-fixed-variant": "#4f378a",
+                            "background": "#141218",
+                            "surface-container-high": "#2b292f",
+                            "secondary": "#cdc0e9",
+                            "surface-variant": "#36343a",
+                            "on-surface": "#e6e0e9",
+                            "primary-container": "#6750a4",
+                            "on-background": "#e6e0e9",
+                            "primary-fixed-dim": "#cfbcff",
+                            "surface-container-low": "#1d1b20",
+                            "on-secondary-fixed-variant": "#4b4263",
+                            "primary-fixed": "#e9ddff",
+                            "on-secondary-container": "#bfb2da",
+                            "on-primary-container": "#e0d2ff",
+                            "on-surface-variant": "#cbc4d2",
+                            "on-secondary": "#342b4b",
+                            "on-primary": "#381e72",
+                            "surface-bright": "#3b383e",
+                            "tertiary": "#e7c365",
+                            "surface": "#141218",
+                            "on-tertiary": "#3e2e00",
+                            "secondary-fixed-dim": "#cdc0e9",
+                            "primary": "#cfbcff",
+                            "secondary-fixed": "#e9ddff",
+                            "tertiary-fixed-dim": "#e7c365",
+                            "surface-container": "#211f24",
+                            "error-container": "#93000a",
+                            "on-primary-fixed": "#22005d",
+                            "on-error": "#690005",
+                            "surface-container-highest": "#36343a",
+                            "on-tertiary-fixed-variant": "#594400",
+                            "surface-dim": "#141218",
+                            "surface-container-lowest": "#0f0d13",
+                            "outline-variant": "#494551",
+                            "on-secondary-fixed": "#1f1635",
+                            "on-tertiary-fixed": "#241a00",
+                            "outline": "#948e9c"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.125rem",
+                            "lg": "0.25rem",
+                            "xl": "0.5rem",
+                            "full": "0.75rem"
+                    },
+                    "spacing": {
+                            "xl": "80px",
+                            "container-max": "1440px",
+                            "lg": "48px",
+                            "xs": "4px",
+                            "sm": "12px",
+                            "md": "24px",
+                            "base": "8px",
+                            "gutter": "24px"
+                    },
+                    "fontFamily": {
+                            "h1": ["Outfit"],
+                            "h1-mobile": ["Outfit"],
+                            "mono-label": ["JetBrains Mono"],
+                            "h2": ["Outfit"],
+                            "h3": ["Outfit"],
+                            "body-lg": ["Inter"],
+                            "body-md": ["Inter"],
+                            "mono-data": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                            "h1": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                            "h1-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                            "mono-label": ["13px", { "lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                            "h2": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                            "h3": ["24px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                            "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                            "body-md": ["15px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                            "mono-data": ["12px", { "lineHeight": "1.4", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Scrollytelling animations & utilities */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-up.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .fade-up {
+                transition: none;
+                transform: none;
+            }
+        }
+        
+        /* Specific glowing accents based on prompt, mapped to CSS variables for clean inline usage */
+        .agent-cato { --agent-accent: #4361EE; }
+        .agent-vela { --agent-accent: #6D4AE8; }
+        .agent-orin { --agent-accent: #8B3DF0; }
+        .agent-iris { --agent-accent: #A93DE0; }
+        .agent-kade { --agent-accent: #C230D6; }
+        .agent-nova { --agent-accent: #DB2894; }
+
+        .agent-glow-text {
+            color: var(--agent-accent);
+            text-shadow: 0 0 20px color-mix(in srgb, var(--agent-accent) 40%, transparent);
+        }
+        .agent-glow-bg {
+            background-color: color-mix(in srgb, var(--agent-accent) 15%, transparent);
+            border-color: color-mix(in srgb, var(--agent-accent) 30%, transparent);
+        }
+        .agent-glow-node {
+            background: var(--agent-accent);
+            box-shadow: 0 0 40px var(--agent-accent);
+        }
+
+        /* Hero text effect */
+        .blur-gradient-text {
+            background: linear-gradient(to right, #cfbcff, #e7c365, #cdc0e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+        .blur-gradient-text::after {
+            content: "Six autonomous agents. One content pipeline.";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #cfbcff, #e7c365, #cdc0e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-xl border-b border-outline-variant/20 transition-all duration-300 ease-in-out">
+<div class="flex justify-between items-center h-xl px-lg max-w-container-max mx-auto">
+<div class="flex items-center gap-md">
+<span class="text-h3 font-h1 font-bold text-on-surface tracking-tight">ContentForge</span>
+</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Platform</a>
+<a class="font-body-md text-body-md text-primary font-semibold border-b-2 border-primary pb-1 hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Agents</a>
+<a class="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Pricing</a>
+<a class="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Company</a>
+</nav>
+<div class="flex items-center">
+<button class="font-body-md text-body-md bg-primary text-on-primary px-md py-sm rounded-full font-medium hover:bg-primary-fixed transition-colors">Get Started</button>
+</div>
+</div>
+</header>
+<!-- SideNavBar (Persistent Sticky Rail) -->
+<nav class="fixed right-md top-1/2 -translate-y-1/2 z-40 bg-transparent flex flex-col gap-md items-center hidden md:flex" id="side-nav">
+<!-- Visual anchor to satisfy header_title/subtext logically without breaking layout -->
+<div class="sr-only">
+<h2 class="">System Agents</h2>
+<p class="">Active Pipeline</p>
+<img alt="Agent Status" data-alt="A small glowing avatar representing artificial intelligence status." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxlTcLd5Og1GaugKomr5qrW2eZpA44P6G02x82ADLqzNqNLtySW2m-8QLjejNXCs-JKb3QBR9Grda7BmBm5-Z8BhBjzlJLRo9aCvrRpjXC5XQccfFrsSdKAOzP1qUnNUxOSJE5ZCjPNexyldewQWHfYKxESUw7-Vr0yuIHMitE1J9zR7C0XUlKF0hQuHPUSwwI7tXaX4OgCWAylvpo-4p5o9OCedajOZkYE6RvRt4_wp9NHukr7r4">
+</div>
+<a class="nav-dot flex items-center justify-center rounded-full hover:scale-110 transition-transform cursor-pointer transition-all duration-500 font-mono-label text-mono-label relative group w-sm h-sm bg-tertiary-container text-on-tertiary-container shadow-[0_0_20px_rgba(231,195,101,0.4)]" data-target="cato" href="#cato">
+<span class="material-symbols-outlined text-[10px] hidden group-hover:block absolute right-full mr-sm bg-surface-container px-sm py-xs rounded text-on-surface shadow-lg whitespace-nowrap">panorama</span>
+</a>
+<a class="nav-dot flex items-center justify-center rounded-full hover:scale-110 transition-transform cursor-pointer transition-all duration-500 font-mono-label text-mono-label relative group w-xs h-xs bg-surface-variant text-on-surface-variant opacity-50 hover:opacity-100" data-target="vela" href="#vela">
+<span class="material-symbols-outlined text-[10px] hidden group-hover:block absolute right-full mr-sm bg-surface-container px-sm py-xs rounded text-on-surface shadow-lg whitespace-nowrap">rocket_launch</span>
+</a>
+<a class="nav-dot flex items-center justify-center rounded-full hover:scale-110 transition-transform cursor-pointer transition-all duration-500 font-mono-label text-mono-label relative group w-xs h-xs bg-surface-variant text-on-surface-variant opacity-50 hover:opacity-100" data-target="orin" href="#orin">
+<span class="material-symbols-outlined text-[10px] hidden group-hover:block absolute right-full mr-sm bg-surface-container px-sm py-xs rounded text-on-surface shadow-lg whitespace-nowrap">crib</span>
+</a>
+<a class="nav-dot flex items-center justify-center rounded-full hover:scale-110 transition-transform cursor-pointer transition-all duration-500 font-mono-label text-mono-label relative group w-xs h-xs bg-surface-variant text-on-surface-variant opacity-50 hover:opacity-100" data-target="iris" href="#iris">
+<span class="material-symbols-outlined text-[10px] hidden group-hover:block absolute right-full mr-sm bg-surface-container px-sm py-xs rounded text-on-surface shadow-lg whitespace-nowrap">visibility</span>
+</a>
+<a class="nav-dot flex items-center justify-center rounded-full hover:scale-110 transition-transform cursor-pointer transition-all duration-500 font-mono-label text-mono-label relative group w-xs h-xs bg-surface-variant text-on-surface-variant opacity-50 hover:opacity-100" data-target="kade" href="#kade">
+<span class="material-symbols-outlined text-[10px] hidden group-hover:block absolute right-full mr-sm bg-surface-container px-sm py-xs rounded text-on-surface shadow-lg whitespace-nowrap">terminal</span>
+</a>
+<a class="nav-dot flex items-center justify-center rounded-full hover:scale-110 transition-transform cursor-pointer transition-all duration-500 font-mono-label text-mono-label relative group w-xs h-xs bg-surface-variant text-on-surface-variant opacity-50 hover:opacity-100" data-target="nova" href="#nova">
+<span class="material-symbols-outlined text-[10px] hidden group-hover:block absolute right-full mr-sm bg-surface-container px-sm py-xs rounded text-on-surface shadow-lg whitespace-nowrap">auto_awesome</span>
+</a>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="min-h-screen flex flex-col items-center justify-center relative px-lg pt-xl" id="hero">
+<div class="max-w-4xl mx-auto text-center fade-up is-visible">
+<h1 class="font-h1 text-h1 md:text-[72px] md:leading-[1.1] blur-gradient-text mb-md">
+                    Six autonomous agents. One content pipeline.
+                </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-xl">
+                    Experience the precision of an orchestrated AI workforce. From raw data acquisition to finalized global rollout.
+                </p>
+</div>
+<div class="absolute bottom-xl left-1/2 -translate-x-1/2 flex flex-col items-center gap-sm animate-bounce opacity-70">
+<span class="font-mono-label text-mono-label text-on-surface-variant tracking-widest uppercase">Scroll to explore</span>
+<span class="material-symbols-outlined text-on-surface">south</span>
+</div>
+</section>
+<!-- 1. Cato -->
+<section class="agent-section agent-cato min-h-screen flex items-center py-xl relative border-t border-surface-container" id="cato">
+<div class="max-w-container-max mx-auto px-lg w-full grid md:grid-cols-2 gap-xl items-center">
+<div class="fade-up space-y-md is-visible">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] agent-glow-text">radar</span>
+<h2 class="font-h2 text-h2 text-on-surface">Cato <span class="text-on-surface-variant font-normal text-[24px]">— The Researcher</span></h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Data acquisition &amp; audience mapping. Cato autonomously scans global trends and competitive landscapes to establish the foundation of your campaign.
+                    </p>
+<div class="flex gap-sm py-sm">
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">research_agent.py</span>
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">scraper_agent.py</span>
+</div>
+<div class="agent-glow-bg border rounded-xl p-md mt-md flex flex-col gap-sm backdrop-blur-md">
+<div class="flex justify-between items-center font-mono-data text-mono-data text-on-surface-variant uppercase tracking-widest">
+<span class="">Receives</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+<span class="">Sends</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<div class="bg-background/50 px-sm py-xs rounded">topic</div>
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">brand voice to Vela</div>
+</div>
+</div>
+</div>
+<div class="fade-up hidden md:flex justify-center items-center h-[500px] relative is-visible">
+<div class="absolute inset-0 border border-outline-variant/30 rounded-full animate-[spin_60s_linear_infinite] border-dashed"></div>
+<div class="absolute inset-md border border-outline-variant/50 rounded-full animate-[spin_40s_linear_infinite_reverse]"></div>
+<div class="w-32 h-32 rounded-full agent-glow-node flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-on-primary text-[48px]">radar</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Vela -->
+<section class="agent-section agent-vela min-h-screen flex items-center py-xl relative border-t border-surface-container" id="vela">
+<div class="max-w-container-max mx-auto px-lg w-full grid md:grid-cols-2 gap-xl items-center">
+<div class="fade-up md:order-2 space-y-md is-visible">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] agent-glow-text">rocket_launch</span>
+<h2 class="font-h2 text-h2 text-on-surface">Vela <span class="text-on-surface-variant font-normal text-[24px]">— The Strategist</span></h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Campaign strategy &amp; angle selection. Processing raw data into structured, high-impact campaign blueprints optimized for conversion.
+                    </p>
+<div class="flex gap-sm py-sm">
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">strategy_agent.py</span>
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">idea_agent.py</span>
+</div>
+<div class="agent-glow-bg border rounded-xl p-md mt-md flex flex-col gap-sm backdrop-blur-md">
+<div class="flex justify-between items-center font-mono-data text-mono-data text-on-surface-variant uppercase tracking-widest">
+<span class="">Receives</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+<span class="">Sends</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<div class="bg-background/50 px-sm py-xs rounded">Cato</div>
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">blueprint to Orin</div>
+</div>
+</div>
+</div>
+<div class="fade-up md:order-1 hidden md:flex justify-center items-center h-[500px] relative is-visible"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqNV6H_Hq5UTtwn7CePbMycxKTxCFcSoarCbgmfwUxXfozded2iA9J0YhECakZHWmuU8rlcFtH5MAHvMmAjAY99P6WwfakG6514CWxuO6YMezodvJoNnunV0HodBYIDxL4ZkiBPuIhPgJNRjr66O65VmC0tDejiqV-Mdp_jWXURmzuyQGejAP5Ky02aGr1YbU5xFwfi6Ej7LnY74UZZj7LrzF43csyj8lRzbCbZA7yoAGIyirIHUk" alt="High-tech campaign strategy interface for Vela the Strategist" class="w-full h-full object-cover rounded-xl border border-outline-variant shadow-2xl"></div>
+</div>
+</section>
+<!-- 3. Orin -->
+<section class="agent-section agent-orin min-h-screen flex items-center py-xl relative border-t border-surface-container" id="orin">
+<div class="max-w-container-max mx-auto px-lg w-full grid md:grid-cols-2 gap-xl items-center">
+<div class="fade-up space-y-md is-visible">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] agent-glow-text">hub</span>
+<h2 class="font-h2 text-h2 text-on-surface">Orin <span class="text-on-surface-variant font-normal text-[24px]">— The Copywriter</span></h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Scripting, copy &amp; captions. Orin translates strategic blueprints into compelling narratives, generating everything from long-form scripts to micro-copy.
+                    </p>
+<div class="flex gap-sm py-sm">
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">script_agent.py</span>
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">caption_agent.py</span>
+</div>
+<div class="agent-glow-bg border rounded-xl p-md mt-md flex flex-col gap-sm backdrop-blur-md">
+<div class="flex justify-between items-center font-mono-data text-mono-data text-on-surface-variant uppercase tracking-widest">
+<span class="">Receives</span>
+<span class="material-symbols-outlined text-[16px]">call_split</span>
+<span class="">Sends</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<div class="bg-background/50 px-sm py-xs rounded">Vela</div>
+<div class="flex flex-col gap-xs items-end">
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">scripts to Iris</div>
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">+ Kade</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fade-up hidden md:flex justify-center items-center h-[500px] relative is-visible">
+<div class="flex flex-col gap-md items-center z-10">
+<div class="w-16 h-16 rounded border-2 border-outline-variant flex items-center justify-center bg-surface-container">Vela</div>
+<div class="w-1 h-16 agent-glow-node opacity-50"></div>
+<div class="w-24 h-24 rounded-full agent-glow-node flex items-center justify-center shadow-[0_0_50px_var(--agent-accent)]">
+<span class="material-symbols-outlined text-on-primary text-[32px]">hub</span>
+</div>
+<div class="flex gap-xl mt-md">
+<div class="flex flex-col items-center">
+<div class="w-1 h-16 agent-glow-node opacity-50 mb-sm transform -rotate-45 origin-bottom"></div>
+<div class="w-16 h-16 rounded border-2 border-outline-variant flex items-center justify-center bg-surface-container">Iris</div>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-1 h-16 agent-glow-node opacity-50 mb-sm transform rotate-45 origin-bottom"></div>
+<div class="w-16 h-16 rounded border-2 border-outline-variant flex items-center justify-center bg-surface-container">Kade</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Iris -->
+<section class="agent-section agent-iris min-h-screen flex items-center py-xl relative border-t border-surface-container" id="iris">
+<div class="max-w-container-max mx-auto px-lg w-full grid md:grid-cols-2 gap-xl items-center">
+<div class="fade-up md:order-2 space-y-md is-visible">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] agent-glow-text">visibility</span>
+<h2 class="font-h2 text-h2 text-on-surface">Iris <span class="text-on-surface-variant font-normal text-[24px]">— The Art Director</span></h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Visual system &amp; image generation. Translating narrative scripts into high-fidelity image prompts and generating the core visual assets.
+                    </p>
+<div class="flex gap-sm py-sm">
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">image_prompt_agent.py</span>
+</div>
+<div class="agent-glow-bg border rounded-xl p-md mt-md flex flex-col gap-sm backdrop-blur-md">
+<div class="flex justify-between items-center font-mono-data text-mono-data text-on-surface-variant uppercase tracking-widest">
+<span class="">Receives</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+<span class="">Sends</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<div class="bg-background/50 px-sm py-xs rounded">Orin</div>
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">keyframes to Kade</div>
+</div>
+</div>
+</div>
+<div class="fade-up md:order-1 hidden md:grid grid-cols-2 gap-sm h-[500px] relative p-lg bg-surface-container-low rounded-xl border border-outline-variant/50 shadow-inner is-visible">
+<div class="bg-cover bg-center rounded-lg col-span-2 shadow-lg" data-alt="A highly detailed, ultra-modern digital abstract art piece showing a glowing neon eye or lens structure against a deep cosmic black background. The style is 3d rendered glassmorphism with vivid purple and violet accent lighting, representing artificial intelligence vision systems." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAiPAxVq77kbNZMlsY51W1Dt_MWEoQt7k5baB7uAuBkuOqwp9koxVKczZCXICcfK0AtDYb7YMZwbMq1zN9xdujgbRGvzdlfo8Y_zYVFGWtVTmqyf4Qvo5W9xhKZUWYAKTQXZRqtppIvS7i90kAKFty180JzVummwmdeVqW3QP863QBPLs2CCm2bdYzUPcu_T9C-OIWNrv7gG2zXhQnmKNBA2eNrN6cDuO0SblLf-KAgqhfVI2CIaRg')"></div>
+<div class="bg-cover bg-center rounded-lg shadow-lg" data-alt="A macro shot of a sleek, futuristic camera sensor circuit board. Deep blacks and grays with intense vibrant purple glowing traces. High contrast, cinematic lighting, conceptual tech illustration." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBv3ymgt9BjlaRJq8Ul7S60U7lJD6ontTQQmxbL6eFKLIYHE1B4cETgETMUuqJWhNeMAiOQHjqpzJDqb9wpMRpZ9tatE0Ze0M7fLK1jSh7VZV5DFBrfjHIgQEp8nb8ZlnO57ffP74zgbv14jhknGrwZNmLsPmdKmeVJddf1L1hkRI0UUwzh6O5180OhEq1W5iwEnzbh40cIsVL1V_wsF8Wt74L8yY3i8RyzV_fVCAR4pHh1hvn9c4o')"></div>
+<div class="bg-cover bg-center rounded-lg shadow-lg" data-alt="Abstract geometric landscape consisting of sharp obsidian monoliths emitting a soft, ethereal violet mist from their bases. Minimalist, high-end 3D rendering, dark mode aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAt63Ut-E3k4kq8XJxKxFf5m0HqnwvtI9eq4w98xTMqs8oel9pTzQqHjAEeSgFzSr94V7964ccpfV-vTuqR2Z01tpZUGm5uD7NhyrgWmrJBd5PlN5fVMbYKa40fVX72QTR0rGcI3fiR42f7PBwlR2lzor_sxWVx9QikvYV20qTMEYHwErPyLXNO34vtIOZ0tKQFAzRaZeBodeloY_yp7JQxCsDNV96tRv7EYDIY5xG_Acp3qTbO0as')"></div>
+</div>
+</div>
+</section>
+<!-- 5. Kade -->
+<section class="agent-section agent-kade min-h-screen flex items-center py-xl relative border-t border-surface-container" id="kade">
+<div class="max-w-container-max mx-auto px-lg w-full grid md:grid-cols-2 gap-xl items-center">
+<div class="fade-up space-y-md is-visible">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] agent-glow-text">terminal</span>
+<h2 class="font-h2 text-h2 text-on-surface">Kade <span class="text-on-surface-variant font-normal text-[24px]">— The Video Producer</span></h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Motion &amp; assembly. Kade ingests audio scripts and static keyframes, applying motion interpolation and timeline assembly to output broadcast-ready video.
+                    </p>
+<div class="flex gap-sm py-sm">
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">video_stitch_agent.py</span>
+</div>
+<div class="agent-glow-bg border rounded-xl p-md mt-md flex flex-col gap-sm backdrop-blur-md">
+<div class="flex justify-between items-center font-mono-data text-mono-data text-on-surface-variant uppercase tracking-widest">
+<span class="">Receives</span>
+<span class="material-symbols-outlined text-[16px]">call_merge</span>
+<span class="">Sends</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<div class="flex flex-col gap-xs">
+<div class="bg-background/50 px-sm py-xs rounded">Iris (keyframes)</div>
+<div class="bg-background/50 px-sm py-xs rounded">Orin (audio)</div>
+</div>
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">MP4 to Nova</div>
+</div>
+</div>
+</div>
+<div class="fade-up hidden md:flex flex-col justify-center gap-sm h-[500px] relative w-full is-visible"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-P1a7MU-9Mc_9a_6AvCf2pkMg6MYxJXx3Tbc2mef3m96bt7hwozhL0dzzBEr3nY5e3D-fSQErsPXswyDq1blscffw8xEJKdDSgbVGuj0yC76YW_PJEuVXxGk0Obt3rGUdW8E929CMV90wAgl3MyI7Y3h6fjDlQesBE_sogeGXyVixwzj0RH4_HvGYHppLcnYwEw8iWfjIH5Fe6s4gVlxO_gj4i8Y5pR7uZNsMxI3BPaOgmhQkmSg" alt="Advanced video editing timeline interface for Kade the Video Producer" class="w-full h-full object-cover rounded-xl border border-outline-variant shadow-2xl"></div>
+</div>
+</section>
+<!-- 6. Nova -->
+<section class="agent-section agent-nova min-h-screen flex items-center py-xl relative border-t border-surface-container" id="nova">
+<div class="max-w-container-max mx-auto px-lg w-full grid md:grid-cols-2 gap-xl items-center">
+<div class="fade-up md:order-2 space-y-md is-visible">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-[32px] agent-glow-text">auto_awesome</span>
+<h2 class="font-h2 text-h2 text-on-surface">Nova <span class="text-on-surface-variant font-normal text-[24px]">— The Distributor</span></h2>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Scheduling &amp; rollout. The final node in the pipeline. Nova handles multi-platform API distribution, calculating optimal posting windows based on global telemetry.
+                    </p>
+<div class="flex gap-sm py-sm">
+<span class="font-mono-label text-mono-label bg-surface-container border border-outline-variant px-sm py-xs rounded-full text-on-surface">calendar_agent.py</span>
+</div>
+<div class="agent-glow-bg border rounded-xl p-md mt-md flex flex-col gap-sm backdrop-blur-md">
+<div class="flex justify-between items-center font-mono-data text-mono-data text-on-surface-variant uppercase tracking-widest">
+<span class="">Receives</span>
+<span class="material-symbols-outlined text-[16px]">flight_takeoff</span>
+<span class="">Sends</span>
+</div>
+<div class="flex justify-between items-center font-body-md text-body-md text-on-surface">
+<div class="bg-background/50 px-sm py-xs rounded">Kade</div>
+<div class="bg-background/50 px-sm py-xs rounded font-medium agent-glow-text">published posts to X/LinkedIn</div>
+</div>
+</div>
+</div>
+<div class="fade-up md:order-1 hidden md:flex justify-center items-center h-[500px] relative is-visible"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlGqG5NXbmxeBZ6eAz46buoffV_htm4ZjubtoXeMv5zRir3PSzEepo5T0x03lQsR1hQwVMfqhn4EyKIttropN2Ood4Ob25fU-xr4pwByKWLteZBsuT33CpKbGd2NgXvitBCpcGCHjvTxo8ihBJWvpF66oK9S2N8dZKhM3rrsVxkM8hEaK2JYuhhKP9ylJBps9_HydIVRfbfriO9RAhZEYEQbh3_ujpQjUHvgbB7W79TtnDIoF3zlM" alt="Global distribution network visualization for Nova the Distributor" class="w-full h-full object-cover rounded-xl border border-outline-variant shadow-2xl"></div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-lg bg-surface-container-lowest border-t border-outline-variant z-10 relative">
+<div class="flex flex-col md:flex-row justify-between items-center px-lg max-w-container-max mx-auto gap-lg">
+<div class="flex flex-col items-center md:items-start gap-sm">
+<span class="text-h3 font-h1 text-on-surface">ContentForge</span>
+<p class="font-body-md text-body-md text-on-surface-variant">© 2024 ContentForge AI. All rights reserved.</p>
+</div>
+<div class="flex flex-col items-center gap-md">
+<p class="font-body-lg text-body-lg text-on-surface font-medium text-center max-w-md">Ready to deploy your autonomous content pipeline?</p>
+<button class="font-body-md text-body-md bg-primary text-on-primary px-lg py-sm rounded-full font-medium hover:bg-primary-fixed transition-colors shadow-[0_0_20px_rgba(207,188,255,0.3)]">Get Started</button>
+</div>
+<nav class="flex gap-md">
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Security</a>
+</nav>
+</div>
+</div>
+</footer>
+
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intersection Observer for fade-up animations and SideNav tracking
+            const sections = document.querySelectorAll('.agent-section, #hero');
+            const navDots = document.querySelectorAll('.nav-dot');
+            
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -40% 0px',
+                threshold: 0
+            };
+
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    // Handle fade up
+                    const fadeElements = entry.target.querySelectorAll('.fade-up');
+                    if (entry.isIntersecting) {
+                        fadeElements.forEach(el => el.classList.add('is-visible'));
+                        
+                        // Update SideNav
+                        const id = entry.target.getAttribute('id');
+                        if (id && id !== 'hero') {
+                            updateSideNav(id);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+
+            // SideNav Update Logic based strictly on JSON provided styles
+            const style_active_navigation = "flex items-center justify-center w-sm h-sm rounded-full bg-tertiary-container text-on-tertiary-container shadow-[0_0_20px_rgba(231,195,101,0.4)]".split(' ');
+            const style_inactive_navigation = "flex items-center justify-center w-xs h-xs rounded-full bg-surface-variant text-on-surface-variant opacity-50 hover:opacity-100".split(' ');
+
+            function updateSideNav(activeId) {
+                navDots.forEach(dot => {
+                    const targetId = dot.getAttribute('data-target');
+                    
+                    // Remove both active and inactive base classes to reset cleanly
+                    dot.classList.remove(...style_active_navigation.filter(c => c !== 'flex' && c !== 'items-center' && c !== 'justify-center' && c !== 'rounded-full'));
+                    dot.classList.remove(...style_inactive_navigation.filter(c => c !== 'flex' && c !== 'items-center' && c !== 'justify-center' && c !== 'rounded-full'));
+                    
+                    if (targetId === activeId) {
+                        // Apply JSON Active Styles
+                        style_active_navigation.forEach(cls => {
+                            if(cls) dot.classList.add(cls);
+                        });
+                        // Hide the icon tooltip logic on active if desired, or keep it.
+                    } else {
+                        // Apply JSON Inactive Styles
+                        style_inactive_navigation.forEach(cls => {
+                            if(cls) dot.classList.add(cls);
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+
+
+</body></html>

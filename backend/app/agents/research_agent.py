@@ -2,7 +2,7 @@ from app.models.state import ContentState
 from app.tools.reddit_tool import search_reddit, extract_reddit_insights
 from app.tools.google_search_tool import google_search, get_trending_content
 from app.tools.scraper import scrape_multiple
-from app.utils.llm import invoke_with_fallback
+from app.utils.llm import async_invoke_with_fallback
 from langchain_core.messages import HumanMessage, SystemMessage
 import json
 import re
@@ -61,7 +61,7 @@ async def research_agent(state: ContentState) -> ContentState:
     }}
     """
 
-    result_text = invoke_with_fallback([
+    result_text = await async_invoke_with_fallback([
         SystemMessage(content="You are a data analyst. Return only valid JSON."),
         HumanMessage(content=prompt),
     ])

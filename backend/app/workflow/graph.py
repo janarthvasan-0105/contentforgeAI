@@ -13,20 +13,21 @@ from app.agents.image_prompt_agent import image_prompt_agent
 from app.agents.image_generation_agent import image_generation_agent
 from app.agents.html_post_composer_agent import html_post_composer_agent
 from app.agents.playwright_render_agent import playwright_render_agent
-from app.agents.video_generation_agent import video_generation_agent
-from app.agents.video_overlay_agent import video_overlay_agent
 from app.agents.calendar_agent import calendar_agent
 from app.agents.memory_agent import memory_retrieval_agent, memory_storage_agent
 
 # New agents
 from app.agents.scraper_agent import scraper_agent
-from app.agents.script_agent import script_agent          # rewritten
+from app.agents.script_agent import script_agent
 from app.agents.tutorial_script_agent import tutorial_script_agent
 from app.agents.video_prompt_agent import video_prompt_agent
 from app.agents.carousel_prompt_agent import carousel_prompt_agent
 from app.agents.twitter_strategy_agent import twitter_strategy_agent
 from app.agents.field_detection_agent import field_detection_agent
 from app.agents.format_picker_agent import format_picker_agent
+from app.agents.compliance_agent import check_suggestion_compliance
+from app.agents.ltx_interpolation_agent import ltx_interpolation_agent
+from app.agents.video_stitch_agent import video_stitch_agent
 
 
 
@@ -44,17 +45,26 @@ def route_after_script(state: ContentForgeState) -> str:
         return "tutorial_script_node"
     return "captions_node"
 
-def route_after_image_prompt(state: ContentForgeState) -> str:
-    """Route to carousel or single image generation."""
+def route_after_compliance(state: ContentForgeState) -> str:
+    """Route back to script generation if compliance fails, else proceed to visuals."""
+    if state.get("needs_regeneration"):
+        return "scripts_node"
+        
     post_type = state.get("post_type", "single_post")
     if post_type == "carousel":
         return "carousel_prompt_agent"
+        
+    format_val = state.get("selected_format", "").lower()
+    if format_val in ["reel", "tiktok", "shorts", "video"] or post_type == "video":
+        return "video_prompt_agent"
+        
     return "image_generation_agent"
 
 def route_after_image_generation(state: ContentForgeState) -> str:
     """Route to video gen or HTML fallback."""
     if state.get("image_generation_success"):
-        # TEMPORARILY DISABLED VIDEO GEN: route straight to calendar
+        if state.get("video_scenes_schema"):
+            return "ltx_interpolation_agent"
         return "calendar_node"
     return "html_post_composer_agent"
 
@@ -92,13 +102,14 @@ def build_graph() -> StateGraph:
     graph.add_node("hashtags_node", hashtag_agent)
     graph.add_node("visual_concept_agent", visual_concept_agent)
     graph.add_node("image_prompt_agent", image_prompt_agent)
+    graph.add_node("compliance_check", check_suggestion_compliance)
     graph.add_node("carousel_prompt_agent", carousel_prompt_agent)
+    graph.add_node("video_prompt_agent", video_prompt_agent)
     graph.add_node("image_generation_agent", image_generation_agent)
     graph.add_node("html_post_composer_agent", html_post_composer_agent)
     graph.add_node("playwright_render_agent", playwright_render_agent)
-    graph.add_node("video_prompt_agent", video_prompt_agent)
-    graph.add_node("video_generation_agent", video_generation_agent)
-    graph.add_node("video_overlay_agent", video_overlay_agent)
+    graph.add_node("ltx_interpolation_agent", ltx_interpolation_agent)
+    graph.add_node("video_stitch_agent", video_stitch_agent)
     graph.add_node("calendar_node", calendar_agent)
     graph.add_node("memory_storage_node", memory_storage_agent)
     graph.add_node("twitter_strategy_node", twitter_strategy_agent)
@@ -146,32 +157,40 @@ def build_graph() -> StateGraph:
     # Visual and Video Pipelines
     graph.add_edge("hashtags_node", "visual_concept_agent")
     graph.add_edge("visual_concept_agent", "image_prompt_agent")
+    graph.add_edge("image_prompt_agent", "compliance_check")
+    
+    # Branching logic for format
     graph.add_conditional_edges(
-        "image_prompt_agent",
-        route_after_image_prompt,
+        "compliance_check",
+        route_after_compliance,
         {
             "carousel_prompt_agent": "carousel_prompt_agent",
-            "image_generation_agent": "image_generation_agent"
+            "video_prompt_agent": "video_prompt_agent",
+            "image_generation_agent": "image_generation_agent",
+            "scripts_node": "scripts_node"
         }
     )
+    
     graph.add_edge("carousel_prompt_agent", "image_generation_agent")
+    graph.add_edge("video_prompt_agent", "image_generation_agent")
+    
+    # Route after Ideogram runs
     graph.add_conditional_edges(
         "image_generation_agent",
         route_after_image_generation,
         {
+            "ltx_interpolation_agent": "ltx_interpolation_agent",
             "calendar_node": "calendar_node",
             "html_post_composer_agent": "html_post_composer_agent"
         }
     )
+    
+    graph.add_edge("ltx_interpolation_agent", "video_stitch_agent")
+    graph.add_edge("video_stitch_agent", "calendar_node")
+
     graph.add_edge("html_post_composer_agent", "playwright_render_agent")
-    # Bypass video generation
     graph.add_edge("playwright_render_agent", "calendar_node")
     
-    # These video nodes remain defined but unreachable
-    graph.add_edge("video_prompt_agent", "video_generation_agent")
-    graph.add_edge("video_generation_agent", "video_overlay_agent")
-    graph.add_edge("video_overlay_agent", "calendar_node")
-
     graph.add_edge("calendar_node", "memory_storage_node")
     graph.add_edge("memory_storage_node", END)
 
@@ -189,5 +208,5 @@ def get_graph():
 
 async def run_workflow(initial_state: dict) -> dict:
     graph = get_graph()
-    final_state = await graph.ainvoke(initial_state)
+    final_state = await graph.ainvoke(initial_state, {"recursion_limit": 50})
     return final_state

@@ -1,25 +1,58 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Optional
 from app.models.schemas import GenerateRequest, ContentOutput
 from app.api.auth import verify_token
 from app.api.database import supabase
 from app.workflow.graph import run_workflow
+from app.services.logo_service import upload_logo, get_user_logo
 from app.utils.twitter_token_manager import (
     encrypt_token, decrypt_token,
     check_token_expiry_by_timestamp,
     validate_tokens_live, full_token_check,
     build_playwright_cookies,
 )
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel
 from fastapi import Request
 import os
 import aiofiles
 from pathlib import Path
+import asyncio
 
 router = APIRouter()
+
+import subprocess
+import os
+
+@router.get("/test_rife")
+def test_rife():
+    cmd = [
+        "python",
+        "frame_interpolation_agent.py",
+        r"D:\ContentForge\backend\outputs\images\693e12eb-f753-4b99-bcd1-c056a0458921_kf_0.png",
+        r"D:\ContentForge\backend\outputs\images\693e12eb-f753-4b99-bcd1-c056a0458921_kf_1.png",
+        "60",
+        "./test_out",
+        "scene1"
+    ]
+    log_file = r"D:\ContentForge\backend\rife_test_4.log"
+    try:
+        env = os.environ.copy()
+        env["PRACTICAL_RIFE_PATH"] = r"D:\~\Practical-RIFE"
+        f = open(log_file, "w")
+        process = subprocess.Popen(
+            cmd,
+            cwd=r"D:\~\Practical-RIFE",
+            stdout=f,
+            stderr=subprocess.STDOUT,
+            env=env
+        )
+        return {"status": "started", "pid": process.pid, "log_file": log_file}
+    except Exception as e:
+        return {"error": str(e)}
+
 
 
 def resolve_tone(
@@ -151,7 +184,16 @@ def sanitize_content_output(data: dict) -> dict:
     return sanitized
 
 
-# ── Generate ──────────────────────────────────────────────────────────────────
+@router.post("/upload-logo")
+async def upload_logo_route(
+    file: UploadFile = File(...),
+    current_user: str = Depends(verify_token),
+):
+    url = await upload_logo(file, current_user)
+    return {"logo_url": url}
+
+
+# ── Sessions ──────────────────────────────────────────────────────────────────
 
 @router.post("/generate", response_model=ContentOutput)
 async def generate_content(
@@ -205,6 +247,8 @@ async def generate_content(
         json_data   = await request.json()
         gen_request = GenerateRequest(**json_data)
 
+    logo_url = get_user_logo(current_user) if gen_request.use_logo else None
+
     initial_state = {
         "topic":                    gen_request.topic,
         "platform":                 gen_request.platform.value,
@@ -239,12 +283,44 @@ async def generate_content(
         "auto_publish":             auto_publish,
         "publish_status":           None,
         "tweet_url":                None,
+        "logo_url":                 logo_url,
         "errors":                   [],
         "status":                   "started",
     }
 
+    # Step 1: Insert "generating" placeholder into database
+    session_doc = {
+        "session_id": request_id,
+        "user_id": current_user,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "brand_name": gen_request.brand_name,
+        "platform": gen_request.platform.value,
+        "tone": initial_state["tone"],
+        "cta_goal": gen_request.cta_goal,
+        "image_style": gen_request.image_style,
+        "session_data": {
+            "topic": gen_request.topic,
+            "target_audience": gen_request.audience,
+            "user_suggestion": gen_request.user_suggestion,
+            "purpose": gen_request.purpose,
+            "status": "generating"
+        }
+    }
     try:
-        result = await run_workflow(initial_state)
+        res = supabase.table("sessions").insert(session_doc).execute()
+        # If there's an error in the response, print it
+        if hasattr(res, 'error') and res.error:
+            print(f"Failed to create initial session placeholder (API Error): {res.error}")
+    except Exception as e:
+        print(f"Failed to create initial session placeholder (Exception): {e}")
+
+    try:
+        # Step 2: Run workflow, shielded from client disconnects
+        result = await asyncio.shield(run_workflow(initial_state))
+    except asyncio.CancelledError:
+        print("Client disconnected, but workflow continues in background.")
+        # Return a detached status to signal to FastAPI we are done here
+        return ContentOutput(request_id=request_id, status="detached")
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -252,7 +328,6 @@ async def generate_content(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Workflow failed: {str(e)}"
         )
-
     allowed_fields   = set(ContentOutput.model_fields.keys()) - {"request_id"}
     safe_result      = {
         k: v for k, v in result.items()
@@ -262,6 +337,25 @@ async def generate_content(
 
     return ContentOutput(request_id=request_id, **sanitized_result)
 
+@router.get("/sessions")
+async def get_sessions(user_id: str = Depends(verify_token)):
+    """
+    Fetch all packages for the logged-in user.
+    Uses the service role Supabase client, so RLS is bypassed safely —
+    access control happens here via verify_token, not via Supabase policies.
+    """
+    try:
+        res = (
+            supabase.table("sessions")
+            .select("*")
+            .eq("user_id", user_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        return {"sessions": res.data}
+    except Exception as e:
+        print(f"Failed to fetch sessions: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch sessions")
 
 # ── Publish ───────────────────────────────────────────────────────────────────
 
@@ -578,3 +672,134 @@ async def live_check_twitter(user_id: str):
         }).eq("user_id", user_id).execute()
 
     return live
+
+
+# ── Analytics ─────────────────────────────────────────────────────────────────
+
+@router.get("/analytics/spend")
+async def get_spend_analytics(user_id: str, platform: Optional[str] = None):
+    if supabase is None:
+        raise HTTPException(status_code=500, detail="DB not available")
+
+    # Fetch sessions for this user instead of spend_analytics to avoid schema issues
+    query = supabase.table("sessions").select("*").eq("user_id", user_id)
+    if platform and platform != "all":
+        query = query.eq("platform", platform)
+    
+    res = query.execute()
+    sessions_records = res.data or []
+
+    # Filter to only completed sessions
+    records = []
+    for s in sessions_records:
+        status = s.get("status")
+        session_data = s.get("session_data") or {}
+        sd_status = session_data.get("status")
+        if status == "completed" or sd_status == "completed":
+            p = len(session_data.get("generated_images", []))
+            v_obj = session_data.get("generated_video") or {}
+            lv_obj = session_data.get("language_videos") or {}
+            v = (1 if v_obj.get("url") else 0) + len(lv_obj.keys()) if isinstance(lv_obj, dict) else 0
+            
+            if p > 0 or v > 0:
+                records.append({
+                    "cost": (p * 0.25) + (v * 2.00),
+                    "posts_count": p,
+                    "videos_count": v,
+                    "platform": s.get("platform", "unknown"),
+                    "created_at": s.get("created_at", "")
+                })
+
+    # Get date strings (UTC)
+    now_utc = datetime.now(timezone.utc)
+    today_str = now_utc.strftime("%Y-%m-%d")
+    yesterday = now_utc - timedelta(days=1)
+    yesterday_str = yesterday.strftime("%Y-%m-%d")
+
+    # Accumulators
+    total_cost = 0.0
+    total_posts = 0
+    total_videos = 0
+    today_cost = 0.0
+    yesterday_cost = 0.0
+    today_posts = 0
+    today_videos = 0
+
+    today_buckets = [0] * 24
+    yesterday_buckets = [0] * 24
+
+    # Platform accumulators if global
+    plat_stats = {}
+
+    for row in records:
+        c = float(row.get("cost", 0))
+        p = int(row.get("posts_count", 0))
+        v = int(row.get("videos_count", 0))
+        plat = row.get("platform", "unknown")
+        created_at = row.get("created_at", "")
+
+        total_cost += c
+        total_posts += p
+        total_videos += v
+
+        if plat not in plat_stats:
+            plat_stats[plat] = {"cost": 0.0, "today_cost": 0.0, "yesterday_cost": 0.0, "assets": 0}
+        
+        plat_stats[plat]["cost"] += c
+        plat_stats[plat]["assets"] += (p + v)
+
+        if created_at.startswith(today_str):
+            today_cost += c
+            today_posts += p
+            today_videos += v
+            plat_stats[plat]["today_cost"] += c
+            try:
+                hour = int(created_at[11:13])
+                today_buckets[hour] += (p + v)
+            except:
+                pass
+        elif created_at.startswith(yesterday_str):
+            yesterday_cost += c
+            plat_stats[plat]["yesterday_cost"] += c
+            try:
+                hour = int(created_at[11:13])
+                yesterday_buckets[hour] += (p + v)
+            except:
+                pass
+
+    def calc_trend(t_cost, y_cost):
+        if y_cost > 0:
+            pct = ((t_cost - y_cost) / y_cost) * 100
+            return ("↑ " if pct >= 0 else "↓ ") + f"{abs(pct):.1f}%", pct >= 0
+        elif t_cost > 0:
+            return "New", True
+        return "↑ 0.0%", True
+
+    total_trend, total_is_up = calc_trend(today_cost, yesterday_cost)
+
+    platforms_res = []
+    if not platform or platform == "all":
+        for k, v in plat_stats.items():
+            t, up = calc_trend(v["today_cost"], v["yesterday_cost"])
+            platforms_res.append({
+                "platform": k,
+                "total_cost": v["cost"],
+                "total_assets": v["assets"],
+                "trend_text": t,
+                "is_up": up
+            })
+
+    return {
+        "total_cost": total_cost,
+        "total_posts": total_posts,
+        "total_videos": total_videos,
+        "trend_text": total_trend,
+        "is_up": total_is_up,
+        "today_posts": today_posts,
+        "today_videos": today_videos,
+        "hourly": {
+            "today": today_buckets,
+            "yesterday": yesterday_buckets
+        },
+        "platforms": platforms_res
+    }

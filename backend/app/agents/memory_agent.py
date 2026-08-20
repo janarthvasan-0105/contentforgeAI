@@ -17,7 +17,7 @@ _embedder = None
 def get_embedder():
     global _embedder
     if _embedder is None:
-        _embedder = SentenceTransformer("all-MiniLM-L6-v2")  # 384 dimensions
+        _embedder = SentenceTransformer("all-mpnet-base-v2")  # 768 dimensions to match Pinecone index
     return _embedder
 
 
@@ -188,6 +188,12 @@ async def memory_storage_agent(state: ContentState) -> ContentState:
     try:
         if supabase:
             session_data = {
+                # Original Input metadata
+                "topic": state.get("topic", ""),
+                "target_audience": state.get("target_audience", ""),
+                "purpose": state.get("purpose", ""),
+                "user_suggestion": state.get("user_suggestion", ""),
+
                 # Research outputs
                 "trends": state.get("trends", []),
                 "pain_points": state.get("pain_points", []),
@@ -241,6 +247,22 @@ async def memory_storage_agent(state: ContentState) -> ContentState:
 
             supabase.table("sessions").upsert(session_doc).execute()
 
+            # Insert spend analytics
+            # Fix: Only count generated images as posts to avoid double counting with rendered URLs
+            posts_count = len(state.get("generated_images", []))
+            videos_count = (1 if state.get("generated_video", {}).get("url") else 0) + len(state.get("language_videos", {}))
+            if posts_count > 0 or videos_count > 0:
+                cost = (posts_count * 0.25) + (videos_count * 2.00)
+                spend_doc = {
+                    "session_id": session_id,
+                    "user_id": user_id,
+                    "platform": platform,
+                    "posts_count": posts_count,
+                    "videos_count": videos_count,
+                    "cost": cost,
+                    "created_at": datetime.utcnow().isoformat()
+                }
+                supabase.table("spend_analytics").insert(spend_doc).execute()
     except Exception as e:
         print(f"Supabase storage failed: {str(e)}")
 
