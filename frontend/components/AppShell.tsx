@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { RotateCw, LogOut, ArrowUpRight } from "lucide-react";
+import { RotateCw, LogOut, ArrowUpRight, Library } from "lucide-react";
 import { logout } from "@/lib/api";
 import IntroAnimation from "@/components/IntroAnimation";
 import LightRays from "@/components/LightRays";
@@ -77,6 +77,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="flex items-center gap-4">
+            <Link
+              href="/blog-generator/drafts"
+              className="group relative inline-flex items-center gap-2 px-4 py-2 border border-neutral-200 text-neutral-600 font-medium text-xs uppercase tracking-widest hover:border-neutral-900 hover:text-neutral-900 transition-colors"
+            >
+              <Library size={13} className="mr-1" />
+              My Blogs
+            </Link>
+
             <button
               onClick={() => (window.location.href = "/generate")}
               title="Start a new generation"

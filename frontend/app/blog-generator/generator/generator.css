@@ -1,0 +1,336 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+.generator-wrapper {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --card-hover: #fafafa;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --ink: #000000;
+  --ink-soft: rgba(0, 0, 0, 0.6);
+  --muted: rgba(0, 0, 0, 0.4);
+  --grad-start: #8763e5;
+  --grad-end: #8763e5;
+  --radius: 16px;
+  
+  background: var(--bg);
+  font-family: 'Inter Tight', -apple-system, sans-serif;
+  color: var(--ink);
+  min-height: calc(100vh - 72px);
+  padding-bottom: 80px;
+}
+
+.generator-wrapper * {
+  box-sizing: border-box;
+}
+
+.page-head {
+  max-width: 1180px;
+  margin: 48px auto 8px;
+  padding: 0 40px;
+}
+
+.page-head h1 {
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 700;
+  font-size: 44px;
+  margin: 0 0 12px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.page-head p {
+  color: var(--ink-soft);
+  font-size: 16px;
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+.layout {
+  max-width: 1180px;
+  margin: 36px auto 80px;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 28px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.step {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  position: relative;
+  padding-left: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.step::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  bottom: -1px;
+  width: 4px;
+  border-radius: var(--radius) 0 0 var(--radius);
+  background: var(--grad-start);
+  opacity: 0.9;
+}
+
+.step-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--grad-start);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.step-head h2 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.step-sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 22px;
+  font-weight: 400;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 24px;
+}
+
+@media (max-width: 600px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field.full {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+.field label .hint {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.field input, .field select, .field textarea {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 11px 13px;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--grad-start);
+  box-shadow: 0 0 0 3px rgba(135, 99, 229, 0.12);
+}
+
+.field input::placeholder, .field textarea::placeholder {
+  color: var(--muted);
+}
+
+.field select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23000000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+.chip-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 14px 8px 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  cursor: pointer;
+  background: var(--card-hover);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.chip:hover {
+  background: var(--card);
+  border-color: var(--border-strong);
+}
+
+.chip .dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border-strong);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.chip.active {
+  color: #fff;
+  background: var(--grad-start);
+  border-color: var(--grad-start);
+}
+
+.chip.active .dot {
+  background: var(--grad-start);
+  border-color: transparent;
+  position: relative;
+}
+
+.chip.active .dot::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Sidebar */
+.sidebar {
+  position: sticky;
+  top: 96px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.08);
+  padding: 26px 26px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sidebar h3 {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13.5px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.summary-row .k {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.summary-row .v {
+  font-weight: 600;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.summary-row .v.muted {
+  color: var(--muted);
+}
+
+.generate-btn {
+  margin-top: 6px;
+  font-family: 'Inter Tight', sans-serif;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: #fff;
+  background: var(--grad-start);
+  border: 1px solid var(--grad-start);
+  border-radius: 999px;
+  padding: 14px 0;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.generate-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.generate-note {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  margin: 0;
+}

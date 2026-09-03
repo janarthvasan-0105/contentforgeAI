@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.api.routes import router
+from app.api.billing import router as billing_router
 from app.config import get_settings
 
 settings = get_settings()
@@ -24,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+app.include_router(billing_router, prefix="/api")
 
 # Serve rendered post PNGs (Legacy)
 rendered_dir = os.path.join(os.path.dirname(__file__), "render", "output")

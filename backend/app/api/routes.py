@@ -200,6 +200,22 @@ async def generate_content(
     request: Request,
     current_user: str = Depends(verify_token)
 ):
+    # --- USAGE LIMIT CHECK ---
+    if supabase:
+        try:
+            sub_resp = supabase.table("user_subscriptions").select("*").eq("user_id", current_user).execute()
+            if sub_resp and sub_resp.data:
+                sub = sub_resp.data[0]
+                if not sub.get("is_tester") and sub.get("tier") == "free":
+                    imgs = sub.get("images_generated", 0)
+                    vids = sub.get("videos_generated", 0)
+                    if imgs >= 3 or vids >= 3:
+                        raise HTTPException(status_code=402, detail="Free tier limit exceeded (3 images, 3 videos max). Please upgrade.")
+        except HTTPException:
+            raise
+        except Exception as e:
+            print(f"[Usage Check] Warning: failed to check limits: {e}")
+
     request_id   = str(uuid.uuid4())
     content_type = request.headers.get("content-type", "")
     poster_path  = None
@@ -311,6 +327,18 @@ async def generate_content(
         # If there's an error in the response, print it
         if hasattr(res, 'error') and res.error:
             print(f"Failed to create initial session placeholder (API Error): {res.error}")
+            
+        # Increment usage for free tier
+        sub_resp = supabase.table("user_subscriptions").select("*").eq("user_id", current_user).execute()
+        if sub_resp and sub_resp.data:
+            sub = sub_resp.data[0]
+            if not sub.get("is_tester") and sub.get("tier") == "free":
+                new_imgs = sub.get("images_generated", 0) + 1
+                new_vids = sub.get("videos_generated", 0) + 1
+                supabase.table("user_subscriptions").update({
+                    "images_generated": new_imgs,
+                    "videos_generated": new_vids
+                }).eq("user_id", current_user).execute()
     except Exception as e:
         print(f"Failed to create initial session placeholder (Exception): {e}")
 

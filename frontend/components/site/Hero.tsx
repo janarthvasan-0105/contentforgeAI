@@ -39,7 +39,7 @@ export default function Hero() {
             isActive={activeMegaMenu === 'Agents'}
             onClick={() => setActiveMegaMenu(activeMegaMenu === 'Agents' ? null : 'Agents')}
           />
-          <NavItem label="Pricing" href="/#pricing" />
+          <NavItem label="Pricing" href="/pricing" />
           <NavItem label="Blog" href="/blog" />
           <NavItem label="Resources" hasDropdown />
         </nav>

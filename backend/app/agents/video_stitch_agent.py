@@ -6,6 +6,7 @@ from app.services.brand_overlay import apply_logo_to_image
 import io
 from PIL import Image
 import numpy as np
+from app.services.storage_service import upload_media_to_supabase
 
 async def video_stitch_agent(state: ContentForgeState) -> ContentForgeState:
     """
@@ -84,9 +85,16 @@ async def video_stitch_agent(state: ContentForgeState) -> ContentForgeState:
         
         file_size_mb = os.path.getsize(final_output_path) / (1024 * 1024)
         
+        # Upload to Supabase Storage
+        try:
+            public_url = upload_media_to_supabase(final_output_path)
+        except Exception as e:
+            print(f"[Storage] Failed to upload video to Supabase: {e}")
+            public_url = f"{app_base_url}/{final_output_path.replace(os.sep, '/')}"
+        
         state["generated_video"] = {
             "local_path": final_output_path,
-            "url": f"{app_base_url}/{final_output_path.replace(os.sep, '/')}",
+            "url": public_url,
             "source": "groq_ideogram_rife",
             "file_size_mb": round(file_size_mb, 2),
         }

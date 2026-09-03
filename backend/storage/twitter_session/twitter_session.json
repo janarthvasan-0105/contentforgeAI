@@ -1,0 +1,45 @@
+{
+  "cookies": [
+    {
+      "name": "auth_token",
+      "value": "eadf67b79f2857d9da926da005c1cd13277dbfdf",
+      "domain": ".twitter.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "ct0",
+      "value": "2f9e72890ff93cb672aa3f4ed9dece91e6aae0038e883b189a07b07afa6951db1b434c8278055eba02ecc74e0737c38abe65bef7ac67baed3834ab90c2dd060ea36525993c87c1692128472387a9983d",
+      "domain": ".twitter.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "auth_token",
+      "value": "eadf67b79f2857d9da926da005c1cd13277dbfdf",
+      "domain": ".x.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "ct0",
+      "value": "2f9e72890ff93cb672aa3f4ed9dece91e6aae0038e883b189a07b07afa6951db1b434c8278055eba02ecc74e0737c38abe65bef7ac67baed3834ab90c2dd060ea36525993c87c1692128472387a9983d",
+      "domain": ".x.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}

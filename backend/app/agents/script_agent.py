@@ -284,15 +284,30 @@ Write a video script for {platform.upper()} with these specs:
 {app_context_str}
 {suggestion_str}
 
+CRITICAL RULE: The brand name "{brand_name}" MUST appear in the FIRST sentence of the
+hook/narration — not later. This guarantees it survives any audio trimming.
+
 Return ONLY valid JSON. No markdown. No explanation:
 {{
-    "hook": "Opening line that grabs attention in first {video_config.get('hook_duration', 3)} seconds",
+    "hook": "Opening line that grabs attention in first {video_config.get('hook_duration', 3)} seconds. MUST start with or mention {brand_name}.",
     "value": "Main value delivery — features, benefits, proof",
     "cta": "Closing call to action for {cta_goal}",
     "full_script": "Complete word-for-word script here",
     "duration": "{video_config.get('duration_min', 15)}-{video_config.get('duration_max', 90)} seconds",
-    "platform": "{platform}"
+    "platform": "{platform}",
+    "scenes": [
+        {{"scene_number": 1, "spoken_line": "Short line for scene 1 — MUST mention {brand_name}", "speaker_present": true}},
+        {{"scene_number": 2, "spoken_line": null, "speaker_present": false}},
+        {{"scene_number": 3, "spoken_line": "Short line for scene 3 if applicable", "speaker_present": true}},
+        {{"scene_number": 4, "spoken_line": "Download {brand_name} today. {cta_goal}.", "speaker_present": true}}
+    ]
 }}
+
+Scene rules:
+- spoken_line is ONLY set when a person is on camera who can plausibly speak to camera.
+- Object-only shots, establishing shots, product-only scenes: speaker_present=false, spoken_line=null.
+- Keep each spoken_line short (1-2 natural sentences max — a few seconds of speech).
+- Brand name MUST be in scene 1's spoken_line (the first speaker_present=true scene).
 """
 
     # ── POST SCRIPT ───────────────────────────────────────────────
@@ -388,11 +403,34 @@ Return ONLY valid JSON array. No markdown. No explanation:
         if not isinstance(video_script, dict) or not video_script:
             raise ValueError(f"video_script parsed as empty or wrong type: {type(video_script)}")
 
-        # Ensure all values are strings
+        # Ensure all flat values are strings
         for k in ["hook", "value", "cta", "full_script", "duration", "platform"]:
             video_script[k] = str(video_script.get(k, ""))
 
+        # ── veo-native-dialogue Step 1: extract per-scene spoken_line list ──
+        raw_scenes = video_script.get("scenes", [])
+        if isinstance(raw_scenes, list) and raw_scenes:
+            video_script_scenes = raw_scenes
+        else:
+            # Fallback: synthesise a single speaking scene from flat script
+            video_script_scenes = [
+                {"scene_number": 1, "spoken_line": video_script.get("hook", ""), "speaker_present": True}
+            ]
+
+        # ── debug-missing-text-brand Bug 2: brand name must be in first spoken line ──
+        first_speaking = next(
+            (s for s in video_script_scenes if s.get("speaker_present")), None
+        )
+        if first_speaking and first_speaking.get("spoken_line"):
+            line = first_speaking["spoken_line"]
+            if brand_name.lower() not in line.lower():
+                print(f"[ScriptAgent] WARNING: brand '{brand_name}' missing from first spoken line — prepending.")
+                first_speaking["spoken_line"] = f"{brand_name}. {line}"
+
+        print(f"[ScriptAgent] DIAG — per-scene spoken_lines: {[(s.get('scene_number'), s.get('spoken_line')) for s in video_script_scenes]}")
+
         state["video_script"] = video_script
+        state["video_script_scenes"] = video_script_scenes
         print(f"[DEBUG] video_script set in state — hook: {video_script.get('hook', '')[:80]}")
 
     except Exception as e:

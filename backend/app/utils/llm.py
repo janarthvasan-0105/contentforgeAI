@@ -7,9 +7,9 @@ import time
 settings = get_settings()
 
 # ── Primary: Groq ──
-GROQ_FAST_MODEL = "llama-3.1-8b-instant"
-GROQ_QUALITY_MODEL = "llama-3.3-70b-versatile"
-GROQ_FALLBACK_MODELS = ["mixtral-8x7b-32768", "gemma2-9b-it"]
+GROQ_FAST_MODEL = "openai/gpt-oss-20b"
+GROQ_QUALITY_MODEL = "openai/gpt-oss-120b"
+GROQ_FALLBACK_MODELS = ["qwen/qwen3.6-27b", "groq/compound"]
 
 
 def get_fast_llm() -> ChatGroq:

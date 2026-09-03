@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     scraper_timeout: int = 30
     max_scrape_chars: int = 15000
 
+    razorpay_key_id: str = ""
+    razorpay_key_secret: str = ""
+
     # Twitter
     twitter_username: Optional[str] = None
     twitter_password: Optional[str] = None

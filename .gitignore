@@ -25,7 +25,7 @@ frontend/.next/
 .idea/
 
 # Local Storage & Uploads
-backend/storage/
+waste/
 backend/temp/
 backend/logs/
 

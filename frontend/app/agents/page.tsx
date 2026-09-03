@@ -156,7 +156,7 @@ export default function AgentsPage() {
           <nav className="hidden md:flex items-center gap-lg">
             <Link className="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Platform</Link>
             <Link className="font-body-md text-body-md text-primary font-semibold border-b-2 border-primary pb-1 hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Agents</Link>
-            <Link className="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="/#pricing">Pricing</Link>
+            <Link className="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="/pricing">Pricing</Link>
             <Link className="font-body-md text-body-md text-on-surface-variant font-medium hover:text-on-surface transition-colors hover:bg-surface-variant/10 px-sm py-xs rounded" href="#">Company</Link>
           </nav>
           <div className="flex items-center">

@@ -131,6 +131,8 @@ export default function GeneratePage() {
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [userTier, setUserTier] = useState<string>("free");
+  const [isTester, setIsTester] = useState<boolean>(false);
 
   // UI state
   const [activeTab, setActiveTab] = useState("overview");
@@ -178,6 +180,20 @@ export default function GeneratePage() {
       if (session?.user) {
         setUser(session.user);
         fetchSessions(session.user.id);
+        
+        // Fetch user tier and tester status from backend (bypasses RLS)
+        try {
+          const res = await fetch("http://localhost:8000/api/me", {
+            headers: { Authorization: `Bearer ${session.access_token}` }
+          });
+          if (res.ok) {
+            const tierData = await res.json();
+            setUserTier(tierData.tier || "free");
+            setIsTester(tierData.is_tester || false);
+          }
+        } catch (e) {
+          console.error("Failed to fetch user tier:", e);
+        }
       } else {
         window.location.href = "/login";
       }
@@ -601,13 +617,26 @@ export default function GeneratePage() {
               Everything crafted by quiet machines — organized, tracked, ready to publish.
             </p>
           </div>
-          <button
-            onClick={() => setShowDrawer(true)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-[#120F17] hover:bg-neutral-800 text-white rounded-full font-semibold text-sm transition shadow-lg self-start md:self-center shrink-0"
-          >
-            <Plus size={16} />
-            <span>New Generation</span>
-          </button>
+          <div className="flex items-center gap-4 shrink-0 self-start md:self-center">
+            {(isTester || userTier === 'tester') && (
+              <span className="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-amber-600 text-white text-xs font-bold rounded-full uppercase tracking-wider shadow-md flex items-center gap-1.5">
+                <Sparkles size={14} />
+                Beta Tester
+              </span>
+            )}
+            {!(isTester || userTier === 'tester') && userTier === 'free' && (
+              <Link href="/pricing" className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-xs font-bold rounded-full uppercase tracking-wider shadow-sm transition">
+                Free Tier
+              </Link>
+            )}
+            <button
+              onClick={() => setShowDrawer(true)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#120F17] hover:bg-neutral-800 text-white rounded-full font-semibold text-sm transition shadow-lg shrink-0"
+            >
+              <Plus size={16} />
+              <span>New Generation</span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Strip */}

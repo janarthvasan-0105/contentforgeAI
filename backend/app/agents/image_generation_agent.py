@@ -2,6 +2,7 @@ from app.models.state import ContentForgeState
 from app.config import get_settings
 from app.services.compositor_service import composite_logo_onto_poster
 from app.services.brand_overlay import apply_logo_to_image
+from app.services.storage_service import upload_media_to_supabase
 import os
 import httpx
 import uuid
@@ -180,9 +181,17 @@ async def image_generation_agent(state: ContentForgeState) -> ContentForgeState:
                     except Exception as e:
                         print(f"[Compositor] Logo compositing failed: {e}")
 
+                # Upload to Supabase Storage
+                try:
+                    public_url = upload_media_to_supabase(final_path)
+                except Exception as e:
+                    print(f"[Storage] Failed to upload image to Supabase: {e}")
+                    public_url = f"{settings.app_base_url}/outputs/images/{session_id}_{index}.png" # fallback
+
                 generated_images.append({
                     "local_path": final_path,
                     "raw_path": raw_path,
+                    "public_url": public_url,
                     "source": "ideogram",
                     "fallback_used": False,
                     "logo_composited": logo_available and bool(logo_path) and os.path.exists(logo_path)
@@ -192,8 +201,7 @@ async def image_generation_agent(state: ContentForgeState) -> ContentForgeState:
         state["image_generation_success"] = True
         state["use_playwright_fallback"] = False
         state["rendered_post_urls"] = [
-            f"{settings.app_base_url}/outputs/images/{session_id}_{i}.png"
-            for i in range(len(generated_images))
+            img["public_url"] for img in generated_images
         ]
         print(f"[Ideogram] Successfully generated {len(generated_images)} images.")
 

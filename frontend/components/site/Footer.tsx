@@ -18,7 +18,7 @@ export default function Footer() {
         {/* Top CTA Area (No Box, Strands in between) */}
         <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto px-6">
           <p className="mx-auto text-2xl sm:text-3xl lg:text-4xl font-sans font-bold leading-snug tracking-tight text-neutral-950">
-            Start with a single brief. Leave with copy, visuals, video direction, and a publishing plan that feels like one coherent launch.
+            Your entire content pipeline, automated. Generate viral video ads and high-ranking SEO blogs from a single prompt.
           </p>
 
           {/* Standalone Strands WebGL Visual Banner (Vertically between text and buttons) */}
@@ -45,17 +45,14 @@ export default function Footer() {
             />
           </div>
 
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link href="/login" className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#8763e5] px-6 font-sans font-bold text-white transition hover:bg-[#53099d] shadow-sm shadow-[#8763e5]/20" data-testid="footer-cta-primary">
+          <div className="flex flex-col items-center justify-center gap-4 sm:flex-row mt-4">
+            <Link href="#choice-section" className="inline-flex min-h-14 items-center gap-2 rounded-full bg-[#8763e5] px-10 text-[17px] font-sans font-bold text-white transition hover:bg-[#53099d] shadow-md shadow-[#8763e5]/20" data-testid="footer-cta-primary">
               Login for free
-              <ArrowRight size={18} />
+              <ArrowRight size={20} />
             </Link>
-            <Link href="#pricing" className="inline-flex min-h-12 items-center rounded-full border border-black/12 bg-white px-6 font-sans font-semibold text-neutral-700 transition hover:border-[#8763e5] hover:text-[#8763e5] shadow-sm" data-testid="footer-cta-secondary">
+            <Link href="/pricing" className="inline-flex min-h-14 items-center rounded-full border border-black/12 bg-white px-10 text-[17px] font-sans font-semibold text-neutral-700 transition hover:border-[#8763e5] hover:text-[#8763e5] shadow-sm hover:shadow-md" data-testid="footer-cta-secondary">
               Explore pricing plan
             </Link>
-          </div>
-          <div className="mt-5 font-sans font-semibold text-[10px] uppercase tracking-[0.24em] text-neutral-400">
-            No card required - 7 trial campaigns included
           </div>
         </div>
 
